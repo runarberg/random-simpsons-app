@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Simpsons app</title>
+    <script>
+     Array.prototype.has = function(a) {
+       return this.indexOf(a) >= 0;
+     }
+
+     Math.randint = function(a, b) {
+       return ((a|0) + (Math.random()*b|0));
+     }
+
+     var app = function() {
+       var NUM_EPISODES = [
+         13, 22, 24, 22, 22, 25, 25, 25, 25, 23, 22, 21, 22,
+         22, 22, 21, 22, 22, 20, 21, 23, 22, 22, 22, 22
+       ];
+
+       // Lets get the list of the episodes we've seen so far
+       var watched =
+             (localStorage["watched simpsons episodes"] !== undefined) ?
+               JSON.parse(localStorage["watched simpsons episodes"]) :
+               // We haven't seen any simpsons episodes yet
+               // lets create a list for future reference
+               NUM_EPISODES.map(function(i) { return []; });
+
+       // Pick an episode to watch.
+       var pickOne = function() {
+         var obj = {}
+         obj.season = Math.randint(1, NUM_EPISODES.length);
+         obj.episode = Math.randint(1, NUM_EPISODES[obj.season-1]);
+         return obj;
+       }
+       
+       var nextOne = pickOne();
+       while (watched[nextOne.season-1].has(nextOne.episode)) {
+         // we've seen this one, pick a new one.
+         nextOne = pickOne();
+       }
+
+       // Mark it so we know not to watch it again.
+       watched[nextOne.season-1].push(nextOne.episode);
+
+       // Save our updated list of watched episodes in our
+       // trusty browser.
+       localStorage["watched simpsons episodes"] = JSON.stringify(watched);
+
+       // And finally redirect us to a stream with our episode
+       // of choice
+       window.location.href = "http://www.thedarewall.com/" +
+                              "tv/simpsons/" +
+                              "season/"+ nextOne.season + "/" +
+                              "episode/" + nextOne.episode;
+     }
+    </script>
+  </head>
+  <body>
+    <p>Finding you an episode to watch...</p>
+    <script>
+     document.addEventListener("DOMContentLoaded", function() {
+       app();
+     });
+    </script>
+  </body>
+</html>
